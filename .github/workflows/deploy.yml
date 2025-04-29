@@ -2,12 +2,12 @@ name: Deploy Backend to AWS ECR and Update Lambda
 
 on:
   push:
-    branches: [ main ]  # You can change branch if needed
+    branches: [ main ]
 
 env:
   AWS_REGION: eu-north-1
   ECR_REPO_NAME: chatbot-backend
-  LAMBDA_FUNCTION_NAME: chatbot-backend  # <-- Lambda function name in AWS
+  LAMBDA_FUNCTION_NAME: chatbot-backend
 
 jobs:
   deploy:
@@ -38,7 +38,7 @@ jobs:
       run: |
         docker push $IMAGE_URI
 
-    - name: Update Lambda Function to Latest Image
+    - name: Update Lambda Function to Use New Image
       run: |
         aws lambda update-function-code \
           --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
