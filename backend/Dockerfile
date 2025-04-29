@@ -9,4 +9,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app/main.py main.py
   
 # Set the Lambda handler
-CMD ["main.app"]
+CMD ["main.handler"]
