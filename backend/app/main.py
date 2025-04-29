@@ -4,6 +4,7 @@ import json
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from openai import OpenAI
+from pydantic import BaseModel
 
 # --- Load secret from Secrets Manager ---
 def get_openai_api_key():
