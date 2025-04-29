@@ -1,0 +1,12 @@
+# prevent leaking secrets
+backend/.env
+
+# python junk
+__pycache__/
+*.pyc
+
+# OS junk
+.DS_Store
+
+# VS Code
+.vscode/
