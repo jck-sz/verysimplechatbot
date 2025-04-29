@@ -1,0 +1,46 @@
+name: Deploy Backend to AWS ECR and Update Lambda
+
+on:
+  push:
+    branches: [ main ]  # You can change branch if needed
+
+env:
+  AWS_REGION: eu-north-1
+  ECR_REPO_NAME: chatbot-backend
+  LAMBDA_FUNCTION_NAME: chatbot-backend  # <-- Lambda function name in AWS
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Log in to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build and tag Docker image
+      run: |
+        IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME }}:latest
+        docker build -t $IMAGE_URI ./backend
+        echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+
+    - name: Push image to ECR
+      run: |
+        docker push $IMAGE_URI
+
+    - name: Update Lambda Function to Latest Image
+      run: |
+        aws lambda update-function-code \
+          --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
+          --image-uri ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME }}:latest \
+          --region ${{ env.AWS_REGION }}
