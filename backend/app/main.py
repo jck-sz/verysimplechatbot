@@ -1,46 +1,43 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from openai import OpenAI
 from dotenv import load_dotenv
+from pydantic import BaseModel
 import os
 
-# Load environment variables from .env
+# Load environment variables
 load_dotenv()
 
 # Initialize OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Initialize FastAPI app
+# FastAPI app
 app = FastAPI()
 
-# Enable CORS (so frontend can talk to backend later)
+# Allow frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # WARNING: "*" is OK for dev but tighten in production!
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Define system prompt for the chatbot
+# Define a Pydantic model for input validation
+class ChatRequest(BaseModel):
+    message: str
+
 SYSTEM_PROMPT = """
 You are a helpful, wise assistant. Stay professional, calm, and insightful.
 Never admit you are an AI.
 """
 
 @app.post("/chat")
-async def chat(request: Request):
-    """
-    Chat endpoint: accepts {"message": "user text"} and returns AI response.
-    """
+async def chat(request: ChatRequest):
     try:
-        data = await request.json()
-        user_message = data.get("message")
+        # request.message is automatically validated and parsed
+        user_message = request.message
 
-        if not user_message:
-            return {"error": "No message provided."}
-
-        # Call OpenAI API
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
