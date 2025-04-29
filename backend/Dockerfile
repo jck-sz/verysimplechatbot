@@ -6,7 +6,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY app app
+COPY app/main.py main.py
   
 # Set the Lambda handler
-CMD ["app.main:app"]
+CMD ["main.app"]
